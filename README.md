@@ -11,7 +11,7 @@
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/etcd-io/etcd/badge)](https://api.securityscorecards.dev/projects/github.com/etcd-io/etcd)
 
 **Note**: The `main` branch may be in an *unstable or even broken state* during development. For stable versions, see [releases][github-release].
-
+    在开发过程中，main分支可能处于不稳定甚至损坏状态，对于稳定版本，可以参见release发布列表
 ![etcd Logo](logos/etcd-horizontal-color.svg)
 
 etcd is a distributed reliable key-value store for the most critical data of a distributed system, with a focus on being:
