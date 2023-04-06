@@ -15,7 +15,7 @@
 ![etcd Logo](logos/etcd-horizontal-color.svg)
 
 etcd is a distributed reliable key-value store for the most critical data of a distributed system, with a focus on being:
-
+etcd 是一个分布式可靠的key-value 存储系统，用来存储分布式系统中最关键的数据
 * *Simple*: well-defined, user-facing API (gRPC)
 * *Secure*: automatic TLS with optional client cert authentication
 * *Fast*: benchmarked 10,000 writes/sec
