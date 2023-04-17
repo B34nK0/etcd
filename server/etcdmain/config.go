@@ -69,6 +69,7 @@ type config struct {
 	ignored      []string
 }
 
+// configFlags 有一组用于命令行解析的flag
 // configFlags has the set of flags used for command line parsing a Config
 type configFlags struct {
 	flagSet       *flag.FlagSet
@@ -83,7 +84,10 @@ func newConfig() *config {
 		ignored: ignored,
 	}
 	cfg.cf = configFlags{
+		//创建一个name为etcd的flag组，或者返回一个desciption 错误
 		flagSet: flag.NewFlagSet("etcd", flag.ContinueOnError),
+		//多参数构造，第一个值为默认值，所以需要保证必须传参
+		//采用set函数将当前值设置为对应的参数，通过string函数即可获取新的参数
 		clusterState: flags.NewSelectiveStringValue(
 			embed.ClusterStateFlagNew,
 			embed.ClusterStateFlagExisting,
@@ -92,6 +96,7 @@ func newConfig() *config {
 			fallbackFlagExit,
 			fallbackFlagProxy,
 		),
+		//参数值为数组, 没有默认值
 		v2deprecation: flags.NewSelectiveStringsValue(
 			string(cconfig.V2_DEPR_1_WRITE_ONLY),
 			string(cconfig.V2_DEPR_1_WRITE_ONLY_DROP),

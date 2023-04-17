@@ -42,8 +42,9 @@ var (
 )
 
 func startEtcdOrProxyV2(args []string) {
+	//是否开启grpc的trace 跟踪grpc的send跟receive
 	grpc.EnableTracing = false
-
+	//解析config
 	cfg := newConfig()
 	defaultInitialCluster := cfg.ec.InitialCluster
 
@@ -257,12 +258,14 @@ func identifyDataDirOrDie(lg *zap.Logger, dir string) dirType {
 }
 
 func checkSupportArch() {
+	// 创建默认的zap日志
 	lg, err := logutil.CreateDefaultZapLogger(zap.InfoLevel)
 	if err != nil {
 		panic(err)
 	}
 	// To add a new platform, check https://github.com/etcd-io/website/blob/main/content/en/docs/${VERSION}/op-guide/supported-platform.md.
 	// The ${VERSION} is the etcd version, e.g. v3.5, v3.6 etc.
+	//  只支持以下CPU架构的编译
 	switch runtime.GOARCH {
 	case "amd64", "arm64", "ppc64le", "s390x":
 		return

@@ -301,6 +301,7 @@ type EtcdServer struct {
 	corruptionChecker CorruptionChecker
 }
 
+// 根据提供的配置创建Etcd服务，在etcdServer的生命周期中该配置被认为是静态的
 // NewServer creates a new EtcdServer from the supplied configuration. The
 // configuration is considered static for the lifetime of the EtcdServer.
 func NewServer(cfg config.ServerConfig) (srv *EtcdServer, err error) {
@@ -349,7 +350,9 @@ func NewServer(cfg config.ServerConfig) (srv *EtcdServer, err error) {
 	srv.beHooks = b.storage.backend.beHooks
 	minTTL := time.Duration((3*cfg.ElectionTicks)/2) * heartbeat
 
+	// 在kv之前恢复lessor，当我们恢复mvcc.KV时，kv会将key重新续租到leases
 	// always recover lessor before kv. When we recover the mvcc.KV it will reattach keys to its leases.
+	// 如果我们先恢复mvcc.KV，那在lessor恢复之前KV会依附到一个错误的lessor
 	// If we recover mvcc.KV first, it will attach the keys to the wrong lessor before it recovers.
 	srv.lessor = lease.NewLessor(srv.Logger(), srv.be, srv.cluster, lease.LessorConfig{
 		MinLeaseTTL:                int64(math.Ceil(minTTL.Seconds())),
@@ -378,6 +381,7 @@ func NewServer(cfg config.ServerConfig) (srv *EtcdServer, err error) {
 
 	srv.authStore = auth.NewAuthStore(srv.Logger(), schema.NewAuthBackend(srv.Logger(), srv.be), tp, int(cfg.BcryptCost))
 
+	//defer 发生在函数调用之后执行，这个时候srv可能微nil，因此借用中间变量来指向nil，这样close关闭时不会出现空指针的情况
 	newSrv := srv // since srv == nil in defer if srv is returned as nil
 	defer func() {
 		// closing backend without first closing kv can cause
@@ -400,16 +404,17 @@ func NewServer(cfg config.ServerConfig) (srv *EtcdServer, err error) {
 	srv.uberApply = srv.NewUberApplier()
 
 	if srv.Cfg.EnableLeaseCheckpoint {
+		// 设置检查点启用租约对检查点特性
 		// setting checkpointer enables lease checkpoint feature.
 		srv.lessor.SetCheckpointer(func(ctx context.Context, cp *pb.LeaseCheckpointRequest) {
 			srv.raftRequestOnce(ctx, pb.InternalRaftRequest{LeaseCheckpoint: cp})
 		})
 	}
-
+	// 在etcdServer完成初始化之后才设置hook钩子，避免在初始化过程中调用hook
 	// Set the hook after EtcdServer finishes the initialization to avoid
 	// the hook being called during the initialization process.
 	srv.be.SetTxPostLockInsideApplyHook(srv.getTxPostLockInsideApplyHook())
-
+	// 将传输的初始化移动到远端定义的附近
 	// TODO: move transport initialization near the definition of remote
 	tr := &rafthttp.Transport{
 		Logger:      cfg.Logger,
@@ -427,12 +432,14 @@ func NewServer(cfg config.ServerConfig) (srv *EtcdServer, err error) {
 	if err = tr.Start(); err != nil {
 		return nil, err
 	}
+	// 在传输对象中添加所有对远端节点
 	// add all remotes into transport
 	for _, m := range b.cluster.remotes {
 		if m.ID != b.cluster.nodeID {
 			tr.AddRemote(m.ID, m.PeerURLs)
 		}
 	}
+	// 添加raft集群节点
 	for _, m := range b.cluster.cl.Members() {
 		if m.ID != b.cluster.nodeID {
 			tr.AddPeer(m.ID, m.PeerURLs)

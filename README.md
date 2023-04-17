@@ -17,11 +17,16 @@
 etcd is a distributed reliable key-value store for the most critical data of a distributed system, with a focus on being:
 etcd 是一个分布式可靠的key-value 存储系统，用来存储分布式系统中最关键的数据
 * *Simple*: well-defined, user-facing API (gRPC)
+简单：定义良好的，面向用户的API
 * *Secure*: automatic TLS with optional client cert authentication
+安全：支持自选用户端认证证书的自动化TLS 
 * *Fast*: benchmarked 10,000 writes/sec
+快： 压测每秒1w次写入
 * *Reliable*: properly distributed using Raft
+可靠性：使用raft实现正确地分配
 
 etcd is written in Go and uses the [Raft][] consensus algorithm to manage a highly-available replicated log.
+ectd使用go实现并使用raft共识算法来管理高可用的复制日志
 
 etcd is used [in production by many companies](./ADOPTERS.md), and the development team stands behind it in critical deployment scenarios, where etcd is frequently teamed with applications such as [Kubernetes][k8s], [locksmith][], [vulcand][], [Doorman][], and many others. Reliability is further ensured by rigorous [**robustness testing**](https://github.com/etcd-io/etcd/tree/main/tests/robustness).
 

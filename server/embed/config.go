@@ -152,9 +152,12 @@ type Config struct {
 
 	SnapshotCount uint64 `json:"snapshot-count"`
 
+	// SnapshotCatchUpEntries 是用于raft节点压缩数据之后的慢跟随者追赶数据的数值
 	// SnapshotCatchUpEntries is the number of entries for a slow follower
 	// to catch-up after compacting the raft storage entries.
+	// 我们期待追随者与领导者之间只有微妙级别的延迟
 	// We expect the follower has a millisecond level latency with the leader.
+	//
 	// The max throughput is around 10K. Keep a 5K entries is enough for helping
 	// follower to catch up.
 	SnapshotCatchUpEntries uint64 `json:"experimental-snapshot-catch-up-entries"`

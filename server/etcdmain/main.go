@@ -23,8 +23,11 @@ import (
 )
 
 func Main(args []string) {
+	// 创建默认的ZapLogger
+	// 检测当前cpu架构是否支持, 当不支持时，在函数里直接退出进程
 	checkSupportArch()
 
+	//进程参数指定执行gateway或者grpc-proxy时调用cobra包执行命令行
 	if len(args) > 1 {
 		cmd := args[1]
 		switch cmd {

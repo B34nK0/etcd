@@ -88,10 +88,13 @@ type Transporter interface {
 	Stop()
 }
 
+// transpot 实现传输接口，用于提供发送raft消息到端，从端接收raft消息端功能
 // Transport implements Transporter interface. It provides the functionality
 // to send raft messages to peers, and receive raft messages from peers.
+// 用户应该调用处理器方法获取响应raft端接收到的请求的处理器
 // User should call Handler method to get a handler to serve requests
 // received from peerURLs.
+// 用户需要在调用其他函数之前调用Start，同时当传输不再使用时调用Stop
 // User needs to call Start before calling other functions, and call
 // Stop when the Transport is no longer used.
 type Transport struct {
